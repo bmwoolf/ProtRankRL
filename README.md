@@ -195,26 +195,6 @@ This will:
 - **Throughput**: 1M+ proteins/day
 - **Accuracy**: >25% improvement over heuristics
 
-## Extensions
-
-### Phase 2: Advanced Reward Functions
-- GO term similarity scoring
-- Diversity metrics
-- Latency penalties
-- Bayesian optimization of reward weights
-
-### Phase 3: Real Data Integration
-- UniProt API integration
-- AlphaFold structural features
-- Knowledge Graph embeddings
-- gRPC streaming for real-time data
-
-### Phase 4: Production Deployment
-- Deploy on AWS with Kubernetes/ECS
-- `/rank?batch_id=` endpoint
-- GPU acceleration (FP16)
-- A/B testing framework
-
 ## License
 
 MIT
@@ -226,7 +206,7 @@ If you use this code in your research, please cite:
 ```bibtex
 @software{protrankrl,
   title={ProtRankRL: Reinforcement Learning for Protein Target Prioritization},
-  author={Your Name},
+  author={Bradley Woolf},
   year={2024},
   url={https://github.com/bmwoolf/ProtRankRL}
 }
