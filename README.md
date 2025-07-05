@@ -1,213 +1,110 @@
-# ProtRankRL: Reinforcement Learning for Protein Target Prioritization
+# ProtRankRL
 
-A Gym-compatible reinforcement learning environment for training AI agents to prioritize protein targets based on scientific embeddings and known outcomes.
+Reinforcement Learning for Protein Target Prioritization
 
 ## Overview
 
-ProtRankRL implements a reinforcement learning system for protein target prioritization in drug discovery. The system models the triage decision process where an agent must rank proteins in a batch based on their likelihood of being successful drug targets.
+ProtRankRL is a Gymnasium-compatible reinforcement learning environment for training agents to prioritize protein targets based on scientific embeddings and known outcomes. The environment models triage decisions over protein batches, enabling RL agents to learn optimal ranking strategies.
 
-### Key Features
+## Features
 
-- **Gym-compatible Environment**: Full compatibility with stable-baselines3 and other RL frameworks
-- **Flexible Feature Support**: Supports UniProt, AlphaFold, and Knowledge Graph embeddings
-- **Extensible Design**: Ready for advanced reward functions and embedding lookups
-- **Comprehensive Testing**: Full test suite with edge case coverage
-- **Production Ready**: Designed for integration with real biopharma workflows
-
-## Installation
-
-```bash
-# 1. Clone the repository
-git clone https://github.com/bmwoolf/ProtRankRL.git
-cd ProtRankRL
-
-# 2. Create a new virtual environment
-python3 -m venv venv
-
-# 3. Activate the virtual environment
-source venv/bin/activate
-
-# 4. Install dependencies
-pip install -r requirements.txt
-```
+- **Gymnasium-compatible**: Full compatibility with RL frameworks
+- **Synthetic data generation**: Built-in factory for testing and development
+- **Type-safe**: Full Python 3.11+ type hints with Pydantic validation
+- **Production-ready**: Comprehensive testing and CI/CD pipeline
+- **PPO integration**: Ready-to-use training scripts with stable-baselines3
 
 ## Quick Start
+
+### Installation
+
+```bash
+# Clone and install
+git clone https://github.com/your-org/protrankrl.git
+cd protrankrl
+pip install -e .
+
+# Install development dependencies
+pip install -e ".[dev]"
+```
 
 ### Basic Usage
 
 ```python
-from src.env.protein_env import ProteinEnvFactory
+from src.env import ProteinEnvFactory
 
-# Create a synthetic environment
+# Create synthetic environment
 env = ProteinEnvFactory.create_synthetic_env(
-    num_proteins=64,
-    feature_dim=128,
+    num_proteins=32,
+    feature_dim=64,
     hit_rate=0.2,
     seed=42
 )
 
-# Run a simple episode
+# Run single episode
 obs, info = env.reset()
-total_reward = 0
-
 while True:
-    action = env.action_space.sample()  # Random action
-    next_obs, reward, done, truncated, info = env.step(action)
-    total_reward += reward
-    
+    action = env.action_space.sample()  # Random policy
+    obs, reward, done, truncated, info = env.step(action)
     if done:
         break
-    
-    obs = next_obs
 
-print(f"Episode completed! Total reward: {total_reward}")
+print(f"Episode reward: {env.get_episode_stats()['total_reward']}")
 ```
 
-### Training with PPO
+### Training PPO Agent
 
-```python
-from stable_baselines3 import PPO
-from stable_baselines3.common.vec_env import DummyVecEnv
-from src.env.protein_env import ProteinEnvFactory
-
-# Create vectorized environment
-def make_env():
-    return ProteinEnvFactory.create_synthetic_env(
-        num_proteins=32,
-        feature_dim=64,
-        hit_rate=0.2
-    )
-
-env = DummyVecEnv([make_env for _ in range(4)])
+```bash
+# Run quick demo
+python examples/quickstart_demo.py
 
 # Train PPO agent
-model = PPO("MlpPolicy", env, verbose=1)
-model.learn(total_timesteps=100000)
-```
-
-## Environment Specification
-
-### State Space
-- **Observation**: `np.ndarray` of shape `(D,)` containing protein features
-- **Features**: UniProt semantic vectors, AlphaFold structural features, KG embeddings
-- **Normalization**: Features are normalized to `[-1, 1]` range by default
-
-### Action Space
-- **Type**: `Discrete(N)` where N is the number of proteins in the batch
-- **Action**: Integer in `[0, N-1]` representing protein ranking decision
-
-### Reward Function
-- **Current**: Binary reward (1 for hit, 0 for non-hit)
-- **Future**: Composite reward with GO similarity, diversity, and latency terms
-
-### Episode Structure
-- **Length**: Fixed batch of proteins (e.g., 64 proteins per episode)
-- **Termination**: Episode ends when all proteins are processed
-- **Reset**: Returns to first protein with new batch
-
-
-## Advanced Features
-
-### Custom Reward Functions
-
-The environment is designed to support advanced reward functions:
-
-```python
-# Future implementation
-reward = α * hit + β * GO_similarity + γ * diversity - δ * latency
-```
-
-### Embedding Integration
-
-Ready for integration with external embedding services:
-
-```python
-# Future implementation
-class ProteinEnvWithEmbeddings(ProteinEnv):
-    def __init__(self, kg_client, uniprot_client, alphafold_client):
-        # Initialize with real embedding clients
-        pass
-```
-
-### Imitation Learning
-
-Support for warm-starting with expert trajectories:
-
-```python
-# Future implementation
-class ProteinEnvWithExpertData(ProteinEnv):
-    def __init__(self, expert_trajectories):
-        # Load expert demonstration data
-        pass
-```
-
-## Testing
-
-Run the test suite:
-
-```bash
-# Run all tests
-pytest tests/
-
-# Run with coverage
-pytest tests/ --cov=src --cov-report=html
-
-# Run specific test
-pytest tests/test_protein_env.py::TestProteinEnv::test_valid_initialization
-```
-
-## Examples
-
-### Basic Demonstration
-
-```bash
-python test_env_demo.py
-```
-
-This will:
-1. Create a synthetic environment
-2. Run episodes with random actions
-3. Compare different strategies
-4. Generate visualization plots
-
-### PPO Training
-
-```bash
 python examples/train_ppo_agent.py
 ```
 
-This will:
-1. Train a PPO agent on the environment
-2. Evaluate performance
-3. Compare with baselines
-4. Save trained model and plots
+## Environment Details
 
-## Performance
+- **Action Space**: Discrete(N) - select protein index
+- **Observation Space**: Box(-1, 1, D) - normalized protein features
+- **Reward**: Binary (0/1) based on whether selected protein is a hit
+- **Episode**: Processes entire protein batch sequentially
 
-### Current Capabilities
-- **Batch Size**: 64 proteins per episode (configurable)
-- **Feature Dimension**: 128 dimensions (configurable)
-- **Training Speed**: ~1000 episodes/hour on CPU
-- **Memory Usage**: ~4KB per protein
+## Development
 
-### Target Performance
-- **Latency**: <120ms p95 for inference
-- **Throughput**: 1M+ proteins/day
-- **Accuracy**: >25% improvement over heuristics
+### Running Tests
+
+```bash
+pytest -q  # Quick tests
+pytest --cov=src  # With coverage
+```
+
+### Code Quality
+
+```bash
+black src/ tests/ examples/  # Format code
+ruff check src/ tests/ examples/  # Lint code
+mypy src/  # Type checking
+```
+
+## Project Structure
+
+```
+ProtRankRL/
+├── src/env/
+│   ├── __init__.py
+│   └── protein_env.py      # Main environment
+├── tests/
+│   ├── __init__.py
+│   └── test_protein_env.py # Comprehensive tests
+├── examples/
+│   ├── quickstart_demo.py  # Single episode demo
+│   └── train_ppo_agent.py  # PPO training script
+├── pyproject.toml          # Modern Python packaging
+├── setup.cfg              # Test configuration
+├── requirements.txt       # Dependencies
+└── README.md             # This file
+```
 
 ## License
 
-MIT
-
-## Citation
-
-If you use this code in your research, please cite:
-
-```bibtex
-@software{protrankrl,
-  title={ProtRankRL: Reinforcement Learning for Protein Target Prioritization},
-  author={Bradley Woolf},
-  year={2024},
-  url={https://github.com/bmwoolf/ProtRankRL}
-}
-```
+MIT License - see LICENSE file for details.
