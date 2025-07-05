@@ -68,8 +68,8 @@ class ProteinEnv(gym.Env):
             dtype=np.float32
         )
         
-        logger.info(f"ProteinEnv initialized with {self.num_proteins} proteins, "
-                   f"{self.feature_dim} features, {np.sum(self.targets)} hits")
+        # logger.info(f"ProteinEnv initialized with {self.num_proteins} proteins, "
+        #             f"feature_dim={self.feature_dim}, normalize={self.normalize_features}")
     
     def _validate_inputs(self, feats: np.ndarray, targets: np.ndarray) -> None:
         """

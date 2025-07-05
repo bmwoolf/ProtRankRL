@@ -1,6 +1,10 @@
 #!/usr/bin/env python3
 """PPO agent training for ProtRankRL."""
 
+import sys
+import os
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+
 from stable_baselines3 import PPO
 from stable_baselines3.common.vec_env import DummyVecEnv
 from stable_baselines3.common.callbacks import EvalCallback
@@ -37,19 +41,19 @@ def main():
         render=False
     )
     
-    # Initialize PPO agent
+    # Create PPO agent
     model = PPO(
         "MlpPolicy",
         train_env,
+        verbose=1,
         learning_rate=3e-4,
-        n_steps=1024,
+        n_steps=2048,
         batch_size=64,
         n_epochs=10,
         gamma=0.99,
         gae_lambda=0.95,
         clip_range=0.2,
-        verbose=1,
-        tensorboard_log="./logs/"
+        tensorboard_log=None,  # Disable tensorboard logging
     )
     
     print(f"Training for 100k timesteps...")
@@ -62,7 +66,7 @@ def main():
     # Test trained model
     print("\nTesting trained model...")
     test_env = ProteinEnvFactory.create_synthetic_env(
-        num_proteins=16,
+        num_proteins=32,  # Match training environment size
         feature_dim=64,
         hit_rate=0.2,
         seed=123
