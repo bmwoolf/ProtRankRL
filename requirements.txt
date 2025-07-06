@@ -4,6 +4,10 @@ stable-baselines3>=2.0.0
 numpy>=1.24.0
 pydantic>=2.0.0
 
+torch>=2.0.0
+fair-esm>=2.0.0
+biopython>=1.80
+
 # Logging and visualization
 tensorboard>=2.13.0
 
@@ -18,5 +22,4 @@ black>=23.0.0
 ruff>=0.1.0
 mypy>=1.0.0
 
-# Optional: for better performance
-torch>=2.0.0 
+# Optional: for better performance 
