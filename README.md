@@ -2,6 +2,12 @@
 
 Reinforcement Learning for Protein Target Prioritization
 
+## TODO
+1. integrate real protein features: use embeddings from UniRep, ESM, ProtBERT, or AlphaFold structure-derived features
+2. Replace random “hits” with real labels: use experimental data (e.g., binding assays, functional screens).
+3. Multi-objective rewards: Add diversity, novelty, or cost constraints to the reward function.
+4. Try other RL algorithms from [miniRL](https://github.com/seungeunrho/minimalRL)
+
 ## Overview
 
 ProtRankRL is a Gymnasium-compatible reinforcement learning environment for training agents to prioritize protein targets based on scientific embeddings and known outcomes. The environment models triage decisions over protein batches, enabling RL agents to learn optimal ranking strategies.
