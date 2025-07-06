@@ -7,7 +7,6 @@ from typing import Any
 import gymnasium as gym
 import numpy as np
 from gymnasium import spaces
-from numpy.typing import NDArray
 
 
 class ProteinEnv(gym.Env):
