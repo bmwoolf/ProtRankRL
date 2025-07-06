@@ -3,6 +3,7 @@
 
 import sys
 import os
+import time
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 from stable_baselines3 import PPO
@@ -29,6 +30,8 @@ def train_and_evaluate(timesteps, model_name):
     print(f"\n{'='*50}")
     print(f"Training for {timesteps:,} timesteps")
     print(f"{'='*50}")
+    
+    start_time = time.time()
     
     # Create environments
     train_env = DummyVecEnv([make_env() for _ in range(4)])
@@ -67,6 +70,8 @@ def train_and_evaluate(timesteps, model_name):
         progress_bar=False  # Disable progress bar
     )
     
+    training_time = time.time() - start_time
+    
     # Test trained model
     test_env = create_synthetic_env(
         num_proteins=32,
@@ -94,6 +99,7 @@ def train_and_evaluate(timesteps, model_name):
     
     # Print results
     print(f"Results for {timesteps:,} timesteps:")
+    print(f"  Training Time: {training_time:.1f} seconds ({training_time/60:.1f} minutes)")
     print(f"  Test Episode Reward: {total_reward:.1f}")
     print(f"  Hits Found: {hits_found}")
     print(f"  Hit Rate: {hit_rate:.3f} ({hits_found}/{step_count})")
@@ -104,6 +110,7 @@ def train_and_evaluate(timesteps, model_name):
     
     return {
         'timesteps': timesteps,
+        'training_time': training_time,
         'reward': total_reward,
         'hits': hits_found,
         'hit_rate': hit_rate
@@ -120,31 +127,39 @@ def main():
     # Test different timestep configurations
     timestep_configs = [
         (100_000, "ppo_100k"),
-        (200_000, "ppo_200k"), 
-        (500_000, "ppo_500k")
+        (500_000, "ppo_500k"),
+        (1_000_000, "ppo_1M"),
+        (2_000_000, "ppo_2M")
     ]
     
     results = []
+    total_start_time = time.time()
     
     for timesteps, model_name in timestep_configs:
         result = train_and_evaluate(timesteps, model_name)
         results.append(result)
     
+    total_time = time.time() - total_start_time
+    
     # Summary
     print(f"\n{'='*60}")
     print("SUMMARY OF ALL TRAINING RUNS")
     print(f"{'='*60}")
-    print(f"{'Timesteps':<12} {'Reward':<8} {'Hits':<6} {'Hit Rate':<10}")
-    print("-" * 40)
+    print(f"{'Timesteps':<12} {'Time(s)':<8} {'Time(m)':<8} {'Reward':<8} {'Hits':<6} {'Hit Rate':<10}")
+    print("-" * 60)
     
     for result in results:
-        print(f"{result['timesteps']:<12,} {result['reward']:<8.1f} "
+        print(f"{result['timesteps']:<12,} {result['training_time']:<8.1f} "
+              f"{result['training_time']/60:<8.1f} {result['reward']:<8.1f} "
               f"{result['hits']:<6} {result['hit_rate']:<10.3f}")
+    
+    print(f"\nTotal training time: {total_time:.1f} seconds ({total_time/60:.1f} minutes)")
     
     # Find best performing model
     best_result = max(results, key=lambda x: x['hit_rate'])
     print(f"\nBest performing model: {best_result['timesteps']:,} timesteps")
     print(f"Hit rate: {best_result['hit_rate']:.3f} ({best_result['hits']} hits)")
+    print(f"Training time: {best_result['training_time']:.1f} seconds")
 
 
 if __name__ == "__main__":
