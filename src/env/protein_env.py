@@ -19,7 +19,7 @@ class ProteinEnv(gym.Env):
         feats: np.ndarray,
         targets: np.ndarray,
         normalize_features: bool = True
-    ):
+    ) -> None:
         # Basic validation
         if len(feats) != len(targets):
             raise ValueError("feats and targets must have same length")
@@ -77,10 +77,10 @@ class ProteinEnv(gym.Env):
 
         return next_obs, reward, done, False, info
 
-    def render(self):
+    def render(self) -> None:
         pass
 
-    def close(self):
+    def close(self) -> None:
         pass
 
 
