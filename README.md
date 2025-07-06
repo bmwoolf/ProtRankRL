@@ -10,15 +10,13 @@ Reinforcement Learning for Protein Target Prioritization
 
 ## Overview
 
-ProtRankRL is a Gymnasium-compatible reinforcement learning environment for training agents to prioritize protein targets based on scientific embeddings and known outcomes. The environment models triage decisions over protein batches, enabling RL agents to learn optimal ranking strategies.
+ProtRankRL is a Gymnasium-compatible reinforcement learning environment for training agents to prioritize protein targets based on scientific embeddings and known outcomes. The goal of this is to understand RL and apply it to one digital domain. The environment models triage decisions over protein batches, enabling RL agents to learn optimal ranking strategies.
 
 ## Features
 
-- **Gymnasium-compatible**: Full compatibility with RL frameworks
-- **Synthetic data generation**: Built-in factory for testing and development
+- **Gymnasium-compatible**: Full compatibility with Gym RL framework
 - **Type-safe**: Full Python 3.11+ type hints with Pydantic validation
-- **Production-ready**: Comprehensive testing and CI/CD pipeline
-- **PPO integration**: Ready-to-use training scripts with stable-baselines3
+[WIP for more]
 
 ## Quick Start
 
@@ -34,30 +32,6 @@ pip install -e .
 pip install -e ".[dev]"
 ```
 
-### Basic Usage
-
-```python
-from src.env import ProteinEnvFactory
-
-# Create synthetic environment
-env = ProteinEnvFactory.create_synthetic_env(
-    num_proteins=32,
-    feature_dim=64,
-    hit_rate=0.2,
-    seed=42
-)
-
-# Run single episode
-obs, info = env.reset()
-while True:
-    action = env.action_space.sample()  # Random policy
-    obs, reward, done, truncated, info = env.step(action)
-    if done:
-        break
-
-print(f"Episode reward: {env.get_episode_stats()['total_reward']}")
-```
-
 ### Training PPO Agent
 
 ```bash
@@ -67,13 +41,6 @@ python examples/quickstart_demo.py
 # Train PPO agent
 python examples/train_ppo_agent.py
 ```
-
-## Environment Details
-
-- **Action Space**: Discrete(N) - select protein index
-- **Observation Space**: Box(-1, 1, D) - normalized protein features
-- **Reward**: Binary (0/1) based on whether selected protein is a hit
-- **Episode**: Processes entire protein batch sequentially
 
 ## Development
 
@@ -92,25 +59,30 @@ ruff check src/ tests/ examples/  # Lint code
 mypy src/  # Type checking
 ```
 
-## Project Structure
+## Generating ESM Protein Embeddings
 
-```
-ProtRankRL/
-├── src/env/
-│   ├── __init__.py
-│   └── protein_env.py      # Main environment
-├── tests/
-│   ├── __init__.py
-│   └── test_protein_env.py # Comprehensive tests
-├── examples/
-│   ├── quickstart_demo.py  # Single episode demo
-│   └── train_ppo_agent.py  # PPO training script
-├── pyproject.toml          # Modern Python packaging
-├── setup.cfg              # Test configuration
-├── requirements.txt       # Dependencies
-└── README.md             # This file
-```
+To use real protein features, you can generate ESM-1b embeddings for your protein sequences using the provided script.
+
+### Requirements
+- `fair-esm` and `torch` (see requirements.txt)
+- Input protein sequences in FASTA format (e.g., `protein_inputs/[protein_name].fasta`)
+
+### Usage
+
+1. Place your protein sequences in a FASTA file (e.g., `protein_inputs/[protein_name].fasta`).
+2. Run the embedding script:
+   ```bash
+   python scripts/generate_esm_embeddings.py --fasta ../protein_inputs/[protein_name].fasta
+   ```
+   - You can also specify output file paths with `--out_npy` and `--out_csv`.
+
+### Output
+- Embeddings are saved as a NumPy array (`esm_embeddings.npy`) and as a CSV file (`esm_embeddings.csv`) with sequence IDs.
+- These files can be loaded into your RL environment as real protein features.
+
 
 ## License
 
-MIT License - see LICENSE file for details.
+MIT
+
+---
