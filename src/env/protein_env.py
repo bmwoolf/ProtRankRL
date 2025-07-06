@@ -43,7 +43,7 @@ class ProteinEnv(gym.Env):
             low=-1.0, high=1.0, shape=(self.feature_dim,), dtype=np.float32
         )
 
-    def _normalize_features(self, feats: np.ndarray) -> NDArray[np.float32]:
+    def _normalize_features(self, feats: np.ndarray) -> np.ndarray:
         """Normalize features to [-1, 1] range."""
         feats_min = np.min(feats, axis=0, keepdims=True)
         feats_max = np.max(feats, axis=0, keepdims=True)
