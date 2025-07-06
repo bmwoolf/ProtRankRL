@@ -8,13 +8,13 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 from stable_baselines3 import PPO
 from stable_baselines3.common.vec_env import DummyVecEnv
 from stable_baselines3.common.callbacks import EvalCallback
-from src.env import ProteinEnvFactory
+from src.env import create_synthetic_env
 
 
 def make_env():
     """Create environment for vectorized training."""
     def _make_env():
-        return ProteinEnvFactory.create_synthetic_env(
+        return create_synthetic_env(
             num_proteins=32,
             feature_dim=64,
             hit_rate=0.2,
@@ -65,7 +65,7 @@ def main():
     
     # Test trained model
     print("\nTesting trained model...")
-    test_env = ProteinEnvFactory.create_synthetic_env(
+    test_env = create_synthetic_env(
         num_proteins=32,  # Match training environment size
         feature_dim=64,
         hit_rate=0.2,
@@ -75,19 +75,21 @@ def main():
     obs, info = test_env.reset()
     total_reward = 0
     step_count = 0
+    hits_found = 0
     
     while True:
         action, _ = model.predict(obs, deterministic=True)
         obs, reward, done, truncated, info = test_env.step(action)
         total_reward += reward
+        hits_found += int(reward)
         step_count += 1
         
         if done:
             break
     
-    stats = test_env.get_episode_stats()
-    print(f"Test episode: reward={stats['total_reward']:.1f}, "
-          f"hits={stats['num_hits_found']}, rate={stats['hit_rate']:.2f}")
+    hit_rate = hits_found / step_count if step_count > 0 else 0
+    print(f"Test episode: reward={total_reward:.1f}, "
+          f"hits={hits_found}, rate={hit_rate:.2f}")
     
     # Save final model
     model.save("models/ppo_protrank_final")

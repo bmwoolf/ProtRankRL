@@ -6,7 +6,7 @@ import os
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 import numpy as np
-from src.env import ProteinEnvFactory
+from src.env import create_synthetic_env
 
 
 def main():
@@ -14,7 +14,7 @@ def main():
     print("=" * 40)
     
     # Create synthetic environment
-    env = ProteinEnvFactory.create_synthetic_env(
+    env = create_synthetic_env(
         num_proteins=16,
         feature_dim=32,
         hit_rate=0.25,
@@ -29,6 +29,7 @@ def main():
     obs, info = env.reset()
     total_reward = 0
     step_count = 0
+    hits_found = 0
     
     print("Episode progress:")
     while True:
@@ -37,22 +38,22 @@ def main():
         obs, reward, done, truncated, info = env.step(action)
         
         total_reward += reward
+        hits_found += int(reward)
         step_count += 1
         
         print(f"  Step {step_count}: action={action}, reward={reward}, "
-              f"hit={info['was_hit']}, remaining={info['remaining_proteins']}")
+              f"hit={info['was_hit']}, remaining={info['remaining']}")
         
         if done:
             break
     
     # Episode statistics
-    stats = env.get_episode_stats()
     print()
     print("Episode complete!")
-    print(f"Total reward: {stats['total_reward']:.1f}")
-    print(f"Hits found: {stats['num_hits_found']}")
-    print(f"Hit rate: {stats['hit_rate']:.2f}")
-    print(f"Episode length: {stats['episode_length']}")
+    print(f"Total reward: {total_reward:.1f}")
+    print(f"Hits found: {hits_found}")
+    print(f"Hit rate: {hits_found/step_count:.2f}")
+    print(f"Episode length: {step_count}")
 
 
 if __name__ == "__main__":
