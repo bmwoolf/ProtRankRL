@@ -49,7 +49,7 @@ class ProteinEnv(gym.Env):
         feats_range = feats_max - feats_min
         feats_range[feats_range == 0] = 1.0
         normalized = 2.0 * (feats - feats_min) / feats_range - 1.0
-        return normalized.astype(np.float32)
+        return normalized.astype(np.float32)  # type: ignore
 
     def reset(self, seed: int | None = None, options: dict[str, Any] | None = None) -> tuple[np.ndarray, dict[str, Any]]:
         super().reset(seed=seed)
