@@ -10,19 +10,16 @@ HEADERS = {'Accept': 'application/json'}
 with open(ACCESSION_FILE) as f:
     UNIPROT_IDS = [line.strip() for line in f if line.strip()]
 
-for uniprot_id in UNIPROT_IDS:
-    print(f'\n=== UniProt: {uniprot_id} ===')
+total = len(UNIPROT_IDS)
+well_annotated_count = 0
+not_annotated_count = 0
+
+for idx, uniprot_id in enumerate(UNIPROT_IDS, 1):
+    print(f'\n[{idx}/{total}] Processing UniProt: {uniprot_id}')
     # 1. /target
     target_url = f'{BASE}/target?target_components.accession={uniprot_id}&limit=1000'
     target_resp = requests.get(target_url, headers=HEADERS)
     target_data = target_resp.json()
-    # Print all returned targets and accessions
-    print(f"/target: found {len(target_data.get('targets', []))} total targets")
-    for t in target_data.get('targets', []):
-        t_id = t.get('target_chembl_id')
-        t_name = t.get('pref_name')
-        accessions = [comp.get('accession') for comp in t.get('target_components', [])]
-        print(f"  Target: {t_id} | Name: {t_name} | Accessions: {accessions}")
     # Filter for exact UniProt match in target_components
     exact_targets = []
     for t in target_data.get('targets', []):
@@ -30,22 +27,28 @@ for uniprot_id in UNIPROT_IDS:
             if comp.get('accession') == uniprot_id:
                 exact_targets.append(t)
                 break
-    print(f"/target: found {len(exact_targets)} exact matches")
     if not exact_targets:
         print(f"  No exact ChEMBL target found for {uniprot_id}")
+        not_annotated_count += 1
         continue
     target = exact_targets[0]
     target_chembl_id = target['target_chembl_id']
-    print(f"  ChEMBL Target ID: {target_chembl_id}")
-    print(f"  Target Name: {target.get('pref_name')}")
+    target_name = target.get('pref_name')
     # 2. /activity
     act_url = f'{BASE}/activity?target_chembl_id={target_chembl_id}&limit=1'
     act_resp = requests.get(act_url, headers=HEADERS)
     act_data = act_resp.json()
     n_activities = act_data['page_meta']['total_count']
-    print(f"/activity: found {n_activities} activities")
+    status = "WELL-ANNOTATED" if n_activities > 0 else "NOT WELL-ANNOTATED"
+    print(f"  ChEMBL Target ID: {target_chembl_id}")
+    print(f"  Target Name: {target_name}")
+    print(f"  Activities: {n_activities}")
+    print(f"  Status: {status}")
     if n_activities > 0:
-        print(f"  {uniprot_id} is WELL-ANNOTATED (has activities)")
+        well_annotated_count += 1
     else:
-        print(f"  {uniprot_id} is NOT well-annotated (no activities)")
-    time.sleep(0.5)  # Be polite to the API 
+        not_annotated_count += 1
+    print(f"  Progress: {well_annotated_count} well-annotated, {not_annotated_count} not well-annotated so far.")
+    time.sleep(0.2)  # Be polite to the API
+
+print(f"\nValidation complete. {well_annotated_count} well-annotated, {not_annotated_count} not well-annotated out of {total}.") 
