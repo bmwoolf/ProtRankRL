@@ -5,8 +5,6 @@
 Reinforcement Learning for Protein Target Prioritization
 
 ## TODO
-1. integrate real protein features: use embeddings from UniRep, ESM, ProtBERT, or AlphaFold structure-derived features
-2. Replace random “hits” with real labels: use experimental data (e.g., binding assays, functional screens).
 3. Multi-objective rewards: Add diversity, novelty, or cost constraints to the reward function.
 4. Try other RL algorithms from [miniRL](https://github.com/seungeunrho/minimalRL)
 
@@ -18,6 +16,9 @@ ProtRankRL is a Gymnasium-compatible reinforcement learning environment for trai
 
 - **Gymnasium-compatible**: Full compatibility with Gym RL framework
 - **Type-safe**: Full Python 3.11+ type hints with Pydantic validation
+- **Real experimental data**: Uses ChEMBL experimental activities instead of synthetic data
+- **ESM protein embeddings**: 1280-dimensional protein representations from ESM-1b
+- **100 validated proteins**: Well-annotated proteins with experimental data
 [WIP for more]
 
 ## Quick Start
@@ -61,27 +62,39 @@ ruff check src/ tests/ examples/  # Lint code
 mypy src/  # Type checking
 ```
 
-## Generating ESM Protein Embeddings
+## Data Pipeline
 
-To use real protein features, you can generate ESM-1b embeddings for your protein sequences using the provided script.
+The project now uses real experimental data instead of synthetic data:
 
-### Requirements
-- `fair-esm` and `torch` (see requirements.txt)
-- Input protein sequences in FASTA format (e.g., `protein_inputs/[protein_name].fasta`)
+### 1. Protein Validation
+- 100 UniProt proteins validated as "well-annotated" in ChEMBL
+- Each protein has exact ChEMBL target match and experimental activities
 
-### Usage
+### 2. Data Collection
+```bash
+# Download protein sequences
+python scripts/data_collection/download_protein_sequences.py
 
-1. Place your protein sequences in a FASTA file (e.g., `protein_inputs/[protein_name].fasta`).
-2. Run the embedding script:
-   ```bash
-   python scripts/generate_esm_embeddings.py --fasta ../protein_inputs/[protein_name].fasta
-   ```
-   - You can also specify output file paths with `--out_npy` and `--out_csv`.
+# Extract experimental activities (parallel)
+python scripts/data_collection/extract_chembl_activities_parallel.py 8
+
+# Generate ESM embeddings
+python scripts/embeddings/generate_esm_embeddings_truncated.py
+
+# Create unified dataset
+python scripts/data_collection/create_unified_dataset.py
+```
+
+### 3. Dataset Statistics
+- **100 proteins** with ESM embeddings (1280 dimensions each)
+- **92,133 experimental activities** from ChEMBL
+- **96% activity rate** (96/100 proteins have experimental data)
+- **Unified format**: Ready for RL environment integration
 
 ### Output
-- Embeddings are saved as a NumPy array (`esm_embeddings.npy`) and as a CSV file (`esm_embeddings.csv`) with sequence IDs.
-- These files can be loaded into your RL environment as real protein features.
-
+- Unified dataset: `protein_inputs/processed/unified_protein_dataset.csv`
+- ESM embeddings: `protein_inputs/embeddings/validated_proteins_esm_embeddings.npy`
+- Experimental data: `protein_inputs/processed/chembl_experimental_data.csv`
 
 ## License
 
