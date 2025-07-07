@@ -32,6 +32,8 @@ class ExperimentalDataLoader:
         if file_path is None:
             # Try to find ChEMBL data files
             possible_files = [
+                self.data_dir / "processed" / "chembl_experimental_data.csv",
+                self.data_dir / "processed" / "chembl_experimental_data.json",
                 self.data_dir / "chembl_experimental_data.csv",
                 self.data_dir / "chembl_experimental_data.json"
             ]
