@@ -1,0 +1,16 @@
+{
+  "9BK7_1|Chain": {
+    "is_hit": false,
+    "binding_affinity_kd": 9.917200738990834e-07,
+    "functional_activity": 0.5815206934847713,
+    "toxicity_score": 0.21731856997130222,
+    "expression_level": 1.0,
+    "properties": {
+      "length": 121,
+      "molecular_weight": 13310.0,
+      "avg_hydrophobicity": -0.3636363636363637,
+      "avg_charge": -0.10082644628099176,
+      "avg_polarity": 0.4628099173553719
+    }
+  }
+}
