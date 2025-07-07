@@ -8,6 +8,11 @@ torch>=2.0.0
 fair-esm>=2.0.0
 biopython>=1.80
 
+# ChEMBL for real experimental data
+chembl-webresource-client>=0.10.8
+pandas>=2.0.0
+requests>=2.28.0
+
 # Logging and visualization
 tensorboard>=2.13.0
 
