@@ -4,7 +4,7 @@
 import os
 import sys
 
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
 import numpy as np
 
@@ -16,12 +16,7 @@ def main():
     print("=" * 40)
 
     # Create synthetic environment
-    env = create_synthetic_env(
-        num_proteins=16,
-        feature_dim=32,
-        hit_rate=0.25,
-        seed=42
-    )
+    env = create_synthetic_env(num_proteins=16, feature_dim=32, hit_rate=0.25, seed=42)
 
     print(f"Environment: {env.num_proteins} proteins, {env.feature_dim} features")
     print(f"Target hits: {np.sum(env.targets)}/{env.num_proteins}")
@@ -43,8 +38,10 @@ def main():
         hits_found += int(reward)
         step_count += 1
 
-        print(f"  Step {step_count}: action={action}, reward={reward}, "
-              f"hit={info['was_hit']}, remaining={info['remaining']}")
+        print(
+            f"  Step {step_count}: action={action}, reward={reward}, "
+            f"hit={info['was_hit']}, remaining={info['remaining']}"
+        )
 
         if done:
             break

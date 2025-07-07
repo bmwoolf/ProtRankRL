@@ -23,7 +23,21 @@ ProtRankRL is a Gymnasium-compatible reinforcement learning environment for trai
 
 ## Quick Start
 
-### Installation
+### Automated Setup (Recommended)
+
+```bash
+# Clone the repository
+git clone https://github.com/your-org/protrankrl.git
+cd protrankrl
+
+# Run automated setup and data pipeline
+python setup.py --run-pipeline
+
+# Or for development setup
+python setup.py --dev --run-pipeline --run-tests
+```
+
+### Manual Installation
 
 ```bash
 # Clone and install
@@ -33,6 +47,19 @@ pip install -e .
 
 # Install development dependencies
 pip install -e ".[dev]"
+
+# Install additional dependencies for data collection
+pip install requests biopython chembl-webresource-client fair-esm torch
+```
+
+### Data Pipeline
+
+```bash
+# Run the complete data pipeline
+python scripts/run_full_pipeline.py
+
+# Or with custom settings
+python scripts/run_full_pipeline.py --num-proteins 50 --num-workers 4 --verbose
 ```
 
 ### Training PPO Agent

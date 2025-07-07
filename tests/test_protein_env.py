@@ -91,10 +91,7 @@ class TestProteinEnv:
 class TestCreateSyntheticEnv:
     def test_create_synthetic_env(self):
         env = create_synthetic_env(
-            num_proteins=20,
-            feature_dim=10,
-            hit_rate=0.3,
-            seed=42
+            num_proteins=20, feature_dim=10, hit_rate=0.3, seed=42
         )
 
         assert env.num_proteins == 20
