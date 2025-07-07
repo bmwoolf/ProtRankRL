@@ -133,13 +133,3 @@ dmypy.json
 # OS
 .DS_Store
 Thumbs.db
-
-# Project specific
-*.png
-*.jpg
-*.jpeg
-*.pdf
-logs/
-checkpoints/
-best_model/
-tensorboard_logs/ 
