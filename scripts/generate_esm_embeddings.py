@@ -10,20 +10,20 @@ def parse_args():
     parser.add_argument(
         "--fasta",
         type=str,
-        default="protein_inputs/SHRT.fasta",
-        help="Path to input FASTA file (default: protein_inputs/SHRT.fasta)",
+        default="protein_inputs/raw/SHRT.fasta",
+        help="Path to input FASTA file (default: protein_inputs/raw/SHRT.fasta)",
     )
     parser.add_argument(
         "--out_npy",
         type=str,
-        default="protein_inputs/SHRT_esm_embeddings.npy",
-        help="Path to output .npy file (default: protein_inputs/SHRT_esm_embeddings.npy)",
+        default="protein_inputs/embeddings/SHRT_esm_embeddings.npy",
+        help="Path to output .npy file (default: protein_inputs/embeddings/SHRT_esm_embeddings.npy)",
     )
     parser.add_argument(
         "--out_csv",
         type=str,
-        default="protein_inputs/SHRT_esm_embeddings.csv",
-        help="Path to output .csv file (default: protein_inputs/SHRT_esm_embeddings.csv)",
+        default="protein_inputs/embeddings/SHRT_esm_embeddings.csv",
+        help="Path to output .csv file (default: protein_inputs/embeddings/SHRT_esm_embeddings.csv)",
     )
     parser.add_argument(
         "--model",
