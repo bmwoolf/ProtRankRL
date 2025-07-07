@@ -15,18 +15,12 @@ Usage:
 
 import argparse
 import logging
+import subprocess
 import sys
 from pathlib import Path
-from typing import Optional
 
 # Add project root to path
 sys.path.append(str(Path(__file__).parent.parent))
-
-from scripts.validation.validate_proteins import validate_protein_accessions
-from scripts.data_collection.download_protein_sequences import download_protein_sequences
-from scripts.data_collection.extract_chembl_activities_parallel import extract_chembl_activities
-from scripts.embeddings.generate_esm_embeddings_truncated import generate_esm_embeddings
-from scripts.data_collection.create_unified_dataset import create_unified_dataset
 
 
 def setup_logging(verbose: bool = False) -> None:
@@ -40,6 +34,29 @@ def setup_logging(verbose: bool = False) -> None:
             logging.FileHandler('pipeline.log')
         ]
     )
+
+
+def run_script(script_path: str, description: str, args: list = None) -> bool:
+    """Run a Python script and return success status."""
+    logger = logging.getLogger(__name__)
+    logger.info(f"🔄 {description}")
+    
+    cmd = [sys.executable, script_path]
+    if args:
+        cmd.extend(args)
+    
+    logger.debug(f"Running: {' '.join(cmd)}")
+    
+    try:
+        result = subprocess.run(cmd, check=True, capture_output=True, text=True)
+        logger.info(f"✅ {description} completed successfully")
+        if result.stdout.strip():
+            logger.debug(f"Output: {result.stdout.strip()}")
+        return True
+    except subprocess.CalledProcessError as e:
+        logger.error(f"❌ {description} failed:")
+        logger.error(f"Error: {e.stderr}")
+        return False
 
 
 def run_pipeline(
@@ -65,56 +82,48 @@ def run_pipeline(
     logger.info(f"Parallel workers: {num_workers}")
     logger.info(f"Force re-run: {force}")
     
-    # Step 1: Validate protein accessions
-    logger.info("\n📋 Step 1: Validating protein accessions against ChEMBL")
+    # Check if we have the required input file
+    accession_file = Path("protein_inputs/processed/annotated_accessions.csv")
+    if not accession_file.exists():
+        logger.error("❌ Missing required file: protein_inputs/processed/annotated_accessions.csv")
+        logger.error("Please ensure you have the initial protein accessions file.")
+        sys.exit(1)
+    
+    # Step 1: Validate protein accessions (optional - just check if we have enough)
+    logger.info("\n📋 Step 1: Checking protein accessions")
     try:
-        validated_count = validate_protein_accessions(
-            num_proteins=num_proteins,
-            force=force
-        )
-        logger.info(f"✅ Validated {validated_count} proteins")
+        import pandas as pd
+        df = pd.read_csv(accession_file)
+        actual_count = len(df)
+        logger.info(f"✅ Found {actual_count} protein accessions")
+        if actual_count < num_proteins:
+            logger.warning(f"⚠️  Only {actual_count} proteins available, but {num_proteins} requested")
     except Exception as e:
-        logger.error(f"❌ Protein validation failed: {e}")
+        logger.error(f"❌ Failed to read accessions file: {e}")
         raise
     
     # Step 2: Download protein sequences
     logger.info("\n🧬 Step 2: Downloading protein sequences from UniProt")
-    try:
-        sequences_count = download_protein_sequences(force=force)
-        logger.info(f"✅ Downloaded {sequences_count} protein sequences")
-    except Exception as e:
-        logger.error(f"❌ Sequence download failed: {e}")
-        raise
+    if not run_script("scripts/data_collection/download_protein_sequences.py", "Downloading protein sequences"):
+        raise RuntimeError("Sequence download failed")
     
     # Step 3: Extract experimental activities
     logger.info("\n🔬 Step 3: Extracting experimental activities from ChEMBL")
-    try:
-        activities_count = extract_chembl_activities(
-            num_workers=num_workers,
-            force=force
-        )
-        logger.info(f"✅ Extracted {activities_count} experimental activities")
-    except Exception as e:
-        logger.error(f"❌ Activity extraction failed: {e}")
-        raise
+    script_args = [str(num_workers)]
+    if force:
+        script_args.append("--force")
+    if not run_script("scripts/data_collection/extract_chembl_activities_parallel.py", "Extracting experimental activities", script_args):
+        raise RuntimeError("Activity extraction failed")
     
     # Step 4: Generate ESM embeddings
     logger.info("\n🧠 Step 4: Generating ESM embeddings")
-    try:
-        embeddings_count = generate_esm_embeddings(force=force)
-        logger.info(f"✅ Generated {embeddings_count} ESM embeddings")
-    except Exception as e:
-        logger.error(f"❌ Embedding generation failed: {e}")
-        raise
+    if not run_script("scripts/embeddings/generate_esm_embeddings_truncated.py", "Generating ESM embeddings"):
+        raise RuntimeError("Embedding generation failed")
     
     # Step 5: Create unified dataset
     logger.info("\n📊 Step 5: Creating unified dataset")
-    try:
-        dataset_info = create_unified_dataset(force=force)
-        logger.info(f"✅ Created unified dataset: {dataset_info}")
-    except Exception as e:
-        logger.error(f"❌ Dataset creation failed: {e}")
-        raise
+    if not run_script("scripts/data_collection/create_unified_dataset.py", "Creating unified dataset"):
+        raise RuntimeError("Dataset creation failed")
     
     logger.info("\n🎉 Pipeline completed successfully!")
     logger.info("📁 Output files:")

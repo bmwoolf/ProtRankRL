@@ -60,6 +60,9 @@ python scripts/run_full_pipeline.py
 
 # Or with custom settings
 python scripts/run_full_pipeline.py --num-proteins 50 --num-workers 4 --verbose
+
+# Validate proteins independently
+python scripts/validation/validate_proteins.py --verbose
 ```
 
 ### Training PPO Agent
