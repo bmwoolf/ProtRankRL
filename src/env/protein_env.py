@@ -179,7 +179,7 @@ def create_synthetic_env(
 
 
 def create_experimental_env(
-    data_source: str = "chembl",
+    data_source: str = "uniprot_bindingdb",
     data_path: Optional[str] = None,
     target_column: str = 'is_hit',
     feature_columns: Optional[List[str]] = None,
@@ -188,21 +188,18 @@ def create_experimental_env(
     max_proteins: Optional[int] = None
 ) -> ProteinEnv:
     """
-    Create environment with real experimental data.
-    
+    Create environment with real experimental data (UniProt+BindingDB or legacy).
     Args:
-        data_source: Source of data ('chembl', 'legacy', or file path)
+        data_source: Source of data ('uniprot_bindingdb', 'legacy', or file path)
         data_path: Path to data file
         target_column: Column name for target labels
         feature_columns: List of feature columns to use
         reward_type: Type of reward function ('binary', 'affinity_based', 'multi_objective')
         normalize_features: Whether to normalize features
         max_proteins: Maximum number of proteins to use (for testing)
-        
     Returns:
         ProteinEnv with real experimental data
     """
-    # Load experimental data
     features, targets, summary_stats = load_experimental_data(
         data_source=data_source,
         data_path=data_path,
@@ -210,42 +207,31 @@ def create_experimental_env(
         feature_columns=feature_columns,
         normalize_features=normalize_features
     )
-    
-    # Limit number of proteins if requested
     if max_proteins and len(features) > max_proteins:
         indices = np.random.choice(len(features), max_proteins, replace=False)
         features = features[indices]
         targets = targets[indices]
-    
-    # Load full experimental data for enhanced rewards
     experimental_data = None
     if reward_type in ["affinity_based", "multi_objective"]:
         try:
             from .data_loader import ExperimentalDataLoader
             loader = ExperimentalDataLoader()
-            
-            if data_source == "chembl":
-                data_df = loader.load_chembl_data(data_path)
+            if data_source == "uniprot_bindingdb":
+                data_df = loader.load_uniprot_bindingdb_data(data_path)
             elif data_source == "legacy":
                 if data_path is None:
                     data_path = "protein_inputs/SHRT_experimental_labels.csv"
                 data_df = loader.load_legacy_data(data_path)
             else:
                 data_df = loader.load_legacy_data(data_source)
-            
-            # Filter to match the features/targets
             if max_proteins:
                 data_df = data_df.iloc[:max_proteins]
-            
             experimental_data = data_df.to_dict('records')
-            
         except Exception as e:
             print(f"Warning: Could not load experimental data for enhanced rewards: {e}")
             experimental_data = None
-    
     print(f"Created experimental environment with {len(features)} proteins")
     print(f"Data summary: {summary_stats}")
-    
     return ProteinEnv(
         feats=features,
         targets=targets,
