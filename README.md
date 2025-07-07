@@ -1,3 +1,5 @@
+![Banner](assets/github_banner.png)
+
 # ProtRankRL
 
 Reinforcement Learning for Protein Target Prioritization
