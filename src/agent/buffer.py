@@ -32,4 +32,4 @@ class TrajectoryBuffer:
             'rewards': self.rewards[:self.ptr],
             'dones': self.dones[:self.ptr],
             'log_probs': self.log_probs[:self.ptr],
-        } 
+        }
