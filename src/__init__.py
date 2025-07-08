@@ -1,4 +1,4 @@
-from .env import ProteinEnv, create_synthetic_env
+"""ProtRankRL - Protein Ranking with Reinforcement Learning."""
 
-__version__ = "0.1.0"
-__all__ = ["ProteinEnv", "create_synthetic_env"]
+__version__ = "1.0.0"
+__all__ = ["ProteinRanker", "ProteinDatabase", "ProteinPredictor"]
