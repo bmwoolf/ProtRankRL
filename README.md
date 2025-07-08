@@ -2,7 +2,7 @@
 
 # ProtRankRL
 
-Reinforcement Learning for Protein Target Prioritization
+Rank proteins using reinforcement learning
 
 ## TODO
 5. production level product per the original description (simplify repo, turn into abstraction layer)
@@ -21,7 +21,7 @@ ProtRankRL is a production-ready reinforcement learning system for prioritizing 
 ## Quick Start
 ```bash
 # Clone and install
-git clone https://github.com/your-org/protrankrl.git
+git clone https://github.com/bmwoolf/protrankrl.git
 cd protrankrl
 
 # Create virtual env
