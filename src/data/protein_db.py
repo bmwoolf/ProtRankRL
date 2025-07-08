@@ -16,7 +16,7 @@ logger = logging.getLogger(__name__)
 class ProteinDatabase:
     """Loads and manages protein data for fast API access."""
     
-    def __init__(self, data_path: str = "protein_inputs/processed/unified_protein_dataset.csv"):
+    def __init__(self, data_path: str = "data/processed/unified_protein_dataset.csv"):
         self.data_path = Path(data_path)
         self.df: Optional[pd.DataFrame] = None
         self.protein_index: Dict[str, int] = {}
@@ -52,7 +52,7 @@ class ProteinDatabase:
     
     def _load_experimental_data(self) -> None:
         """Load experimental data for proteins."""
-        exp_data_path = Path("protein_inputs/processed/chembl_experimental_data.csv")
+        exp_data_path = Path("data/processed/chembl_experimental_data.csv")
         if exp_data_path.exists():
             logger.info("Loading experimental data")
             exp_df = pd.read_csv(exp_data_path)

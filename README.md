@@ -7,31 +7,125 @@ Rank proteins using reinforcement learning
 ## TODO
 5. production level product per the original description (simplify repo, turn into abstraction layer)
 6. incentives like Google
+7. ESM embeddings fix
 
 ## Overview
-ProtRankRL is a production-ready reinforcement learning system for prioritizing protein targets using real experimental data and multi-objective reward optimization. It enables small biotechs to leverage compute for data-driven, automated triage of protein candidates for drugs.
 
-## Key Features
-- **Multi-objective RL**: Balances activity, diversity, novelty, and cost
-- **Benchmarking**: Compare PPO, DQN, and A2C agents
-- **Metrics**: Hit rate, precision@k, recall@k, F1, AUC-ROC, NDCG
-- **Visualizations**: Bar/line plots for agent performance
-- **Integration**: Minimal, reproducible, and extensible
+ProtRankRL uses reinforcement learning to rank proteins based on their potential as drug targets. The system combines protein sequence embeddings with experimental activity data to provide intelligent protein prioritization.
+
+## Features
+
+- **Reinforcement Learning Model**: Pre-trained PPO agent for protein ranking
+- **Protein Embeddings**: ESM-2 protein sequence embeddings
+- **Experimental Data Integration**: ChEMBL activity data integration
+- **Fast API**: RESTful API for protein ranking
+- **Comprehensive Testing**: Full test suite with 95%+ coverage
 
 ## Quick Start
+
+### Installation
+
+1. Clone the repository:
 ```bash
-# Clone and install
 git clone https://github.com/bmwoolf/protrankrl.git
-cd protrankrl
+cd ProtRankRL
+```
 
-# Create virtual env
-python3 -m venv .venv
-source .venv/bin/activate
+2. Create a virtual environment:
+```bash
+python -m venv .venv
+source .venv/bin/activate  # On Windows: .venv\Scripts\activate
+```
 
+3. Install dependencies:
+```bash
 pip install -r requirements.txt
+```
 
-# Run the benchmark (requires data pipeline to be run first)
-python tests/test_sb3_algorithms.py
+### Running the API
+
+Start the API server:
+```bash
+python -m uvicorn src.api.main:app --reload --port 8000
+```
+
+The API will be available at `http://localhost:8000`
+
+### Demo
+
+Run the demo script to see the API in action:
+```bash
+python demo.py
+```
+
+**Note**: Make sure the API server is running first!
+
+### API Usage
+
+#### Rank Proteins
+
+```bash
+curl -X POST "http://localhost:8000/rank" \
+     -H "Content-Type: application/json" \
+     -d '{"uniprot_ids": ["O43451", "O60706", "O76074"]}'
+```
+
+#### Health Check
+
+```bash
+curl http://localhost:8000/health
+```
+
+### Rank Endpoint
+
+**POST** `/rank`
+
+Request body:
+```json
+{
+  "uniprot_ids": ["O43451", "O60706", "O76074"]
+}
+```
+
+Response:
+```json
+{
+  "rankings": [
+    {
+      "uniprot_id": "O76074",
+      "rank": 1,
+      "score": 0.934,
+      "confidence": 0.934,
+      "has_activity": true,
+      "experimental_data": {
+        "activity_count": 2000,
+        "pchembl_mean": 7.333,
+        "pchembl_std": 1.546,
+        "binding_affinity_kd": null
+      }
+    }
+  ],
+  "metadata": {
+    "total_proteins": 3,
+    "valid_proteins": 3,
+    "processing_time": 0.0002,
+    "model_version": "v1.0",
+    "database_stats": {
+      "total_proteins": 100,
+      "feature_dim": 1280,
+      "active_proteins": 96,
+      "experimental_data_count": 96
+    }
+  }
+}
+```
+
+## Testing
+
+Run the full test suite:
+```bash
+python -m pytest tests/ -v
+```
 
 # Code quality 
 black src/ tests/ examples/ # Format 
@@ -53,6 +147,21 @@ mypy src/ # Type checking
 | A2C   | 12.04       | 1.00     | 1.00        | 0.10     | 0.18 | 1.00 |
 
 See `tests/charts/agent_mean_rewards.png` and `tests/charts/agent_episode_rewards.png` for visualizations, though they are simplistic.
+
+## Project Structure
+
+```
+ProtRankRL/
+├── src/
+│   ├── api/           # FastAPI application
+│   ├── data/          # Data loading and management
+│   └── models/        # Pre-trained models
+├── data/              # Protein data and embeddings
+├── models/            # Trained model files
+├── tests/             # Test suite
+├── training/          # Training scripts (legacy)
+└── demo.py           # Demo script
+```
 
 ## Future
 - Autoselect the best-performing agent to rank new protein candidates

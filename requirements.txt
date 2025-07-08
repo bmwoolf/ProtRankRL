@@ -30,6 +30,7 @@ rich>=13.0.0
 # API dependencies
 fastapi>=0.100.0
 uvicorn>=0.20.0
+httpx>=0.24.0
 
 # Development and testing
 pytest>=7.0.0
