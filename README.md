@@ -5,9 +5,8 @@
 Reinforcement Learning for Protein Target Prioritization
 
 ## TODO
-4. Try other RL algorithms from [miniRL](https://github.com/seungeunrho/minimalRL)
-5. turn into a production level product per the original description
-6. simplify repo, turn into abstraction layer
+5. production level product per the original description (simplify repo, turn into abstraction layer)
+6. incentives like Google
 
 ## Overview
 
