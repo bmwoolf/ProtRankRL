@@ -147,7 +147,7 @@ def main():
     plt.ylabel("Mean Reward")
     plt.xlabel("Agent")
     plt.tight_layout()
-    plt.savefig("tests/outputs/agent_mean_rewards.png", dpi=150)
+    plt.savefig("tests/charts/agent_mean_rewards.png", dpi=150)
     plt.show()
 
     plt.figure(figsize=(12, 6))
@@ -158,7 +158,7 @@ def main():
     plt.ylabel("Reward")
     plt.legend()
     plt.tight_layout()
-    plt.savefig("tests/outputs/agent_episode_rewards.png", dpi=150)
+    plt.savefig("tests/charts/agent_episode_rewards.png", dpi=150)
     plt.show()
 
 
