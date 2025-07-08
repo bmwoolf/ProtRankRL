@@ -52,7 +52,7 @@ mypy src/ # Type checking
 | DQN   | 10.89       | 0.70     | 0.60        | 0.09     | 0.15 | 1.00 |
 | A2C   | 12.04       | 1.00     | 1.00        | 0.10     | 0.18 | 1.00 |
 
-See `tests/outputs/agent_mean_rewards.png` and `tests/outputs/agent_episode_rewards.png` for visualizations, though they are simplistic.
+See `tests/charts/agent_mean_rewards.png` and `tests/charts/agent_episode_rewards.png` for visualizations, though they are simplistic.
 
 ## Future
 - Autoselect the best-performing agent to rank new protein candidates
