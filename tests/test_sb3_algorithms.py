@@ -4,24 +4,41 @@ Test/benchmark PPO, DQN, and A2C (Actor-Critic) from Stable Baselines3 on the sa
 Compare their performance using the multi-objective reward function.
 """
 
-import sys
 import os
+import sys
+
 sys.path.append(os.path.abspath("."))
 
-from stable_baselines3 import PPO, DQN, A2C
-from stable_baselines3.common.vec_env import DummyVecEnv
-import numpy as np
 import matplotlib.pyplot as plt
+import numpy as np
 import seaborn as sns
+from sklearn.metrics import (
+    ndcg_score,
+    roc_auc_score,
+)
+from stable_baselines3 import A2C, DQN, PPO
+from stable_baselines3.common.vec_env import DummyVecEnv
 
 from src.env import create_experimental_env
-from sklearn.metrics import roc_auc_score, ndcg_score, precision_score, recall_score, f1_score
 
 ALGOS = [
     ("PPO", PPO),
     ("DQN", DQN),
     ("A2C", A2C),
 ]
+
+
+def env_fn():
+    return create_experimental_env(
+        data_source="protein_inputs/processed/unified_protein_dataset.csv",
+        reward_type="enhanced_multi_objective",
+        max_proteins=30,
+        diversity_weight=0.3,
+        novelty_weight=0.2,
+        cost_weight=0.1,
+        max_episode_length=10,
+    )
+
 
 def compute_metrics(selected_hits, all_hits, rewards, k=5):
     # selected_hits: list of 0/1 for each selected protein (was_hit)
@@ -36,30 +53,36 @@ def compute_metrics(selected_hits, all_hits, rewards, k=5):
     cum_reward = np.sum(rewards)
     # Precision@k, Recall@k, F1@k
     top_k = selected_hits[:k]
-    true_k = all_hits[:k]
     precision_at_k = sum(top_k) / k if k else 0.0
     recall_at_k = sum(top_k) / n_total_hits if n_total_hits else 0.0
-    f1_at_k = (2 * precision_at_k * recall_at_k / (precision_at_k + recall_at_k)) if (precision_at_k + recall_at_k) else 0.0
+    f1_at_k = (
+        (2 * precision_at_k * recall_at_k / (precision_at_k + recall_at_k))
+        if (precision_at_k + recall_at_k)
+        else 0.0
+    )
     # AUC-ROC (if possible)
     try:
-        auc_roc = roc_auc_score(all_hits, [1.0]*len(all_hits))  # Dummy: all selected, for demo
+        auc_roc = roc_auc_score(
+            all_hits, [1.0] * len(all_hits)
+        )  # Dummy: all selected, for demo
     except Exception:
-        auc_roc = float('nan')
+        auc_roc = float("nan")
     # NDCG (ranking quality)
     try:
         ndcg = ndcg_score([all_hits], [selected_hits])
     except Exception:
-        ndcg = float('nan')
+        ndcg = float("nan")
     return {
-        'hit_rate': hit_rate,
-        'avg_reward': avg_reward,
-        'cum_reward': cum_reward,
-        'precision@k': precision_at_k,
-        'recall@k': recall_at_k,
-        'f1@k': f1_at_k,
-        'auc_roc': auc_roc,
-        'ndcg': ndcg,
+        "hit_rate": hit_rate,
+        "avg_reward": avg_reward,
+        "cum_reward": cum_reward,
+        "precision@k": precision_at_k,
+        "recall@k": recall_at_k,
+        "f1@k": f1_at_k,
+        "auc_roc": auc_roc,
+        "ndcg": ndcg,
     }
+
 
 def evaluate_agent(model, env, n_episodes=5, k=5):
     rewards = []
@@ -75,8 +98,8 @@ def evaluate_agent(model, env, n_episodes=5, k=5):
             action, _ = model.predict(obs, deterministic=True)
             obs, reward, done, truncated, info = env.step(action)
             episode_reward += reward
-            selected_hits.append(int(info.get('was_hit', 0)))
-            env_hits.append(int(info.get('was_hit', 0)))
+            selected_hits.append(int(info.get("was_hit", 0)))
+            env_hits.append(int(info.get("was_hit", 0)))
             if done:
                 break
         rewards.append(episode_reward)
@@ -85,26 +108,20 @@ def evaluate_agent(model, env, n_episodes=5, k=5):
     metrics = compute_metrics(all_selected_hits, all_env_hits, rewards, k=k)
     return np.mean(rewards), rewards, metrics
 
+
 def main():
     print("Benchmarking PPO, DQN, and A2C on multi-objective reward environment\n")
-    env_fn = lambda: create_experimental_env(
-        data_source="protein_inputs/processed/unified_protein_dataset.csv",
-        reward_type="enhanced_multi_objective",
-        max_proteins=30,
-        diversity_weight=0.3,
-        novelty_weight=0.2,
-        cost_weight=0.1,
-        max_episode_length=10,
-    )
     results = {}
-    for name, Algo in ALGOS:
+    for name, algo in ALGOS:
         print(f"Training {name}...")
         env = DummyVecEnv([env_fn])
-        model = Algo("MlpPolicy", env, verbose=0)
+        model = algo("MlpPolicy", env, verbose=0)
         model.learn(total_timesteps=10_000)
         print(f"Evaluating {name}...")
         eval_env = env_fn()
-        mean_reward, rewards, metrics = evaluate_agent(model, eval_env, n_episodes=5, k=5)
+        mean_reward, rewards, metrics = evaluate_agent(
+            model, eval_env, n_episodes=5, k=5
+        )
         results[name] = {
             "mean_reward": mean_reward,
             "rewards": rewards,
@@ -113,7 +130,9 @@ def main():
         print(f"{name} mean reward: {mean_reward:.2f}\n")
     print("\nSummary:")
     for name, res in results.items():
-        print(f"{name}: Mean Reward = {res['mean_reward']:.2f}, Rewards = {res['rewards']}")
+        print(
+            f"{name}: Mean Reward = {res['mean_reward']:.2f}, Rewards = {res['rewards']}"
+        )
         print(f"  Metrics: {res['metrics']}")
 
     # --- Visualization ---
@@ -142,5 +161,6 @@ def main():
     plt.savefig("tests/outputs/agent_episode_rewards.png", dpi=150)
     plt.show()
 
+
 if __name__ == "__main__":
-    main() 
+    main()
