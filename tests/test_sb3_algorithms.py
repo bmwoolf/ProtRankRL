@@ -15,6 +15,7 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 
 from src.env import create_experimental_env
+from sklearn.metrics import roc_auc_score, ndcg_score, precision_score, recall_score, f1_score
 
 ALGOS = [
     ("PPO", PPO),
@@ -22,20 +23,67 @@ ALGOS = [
     ("A2C", A2C),
 ]
 
-def evaluate_agent(model, env, n_episodes=5):
+def compute_metrics(selected_hits, all_hits, rewards, k=5):
+    # selected_hits: list of 0/1 for each selected protein (was_hit)
+    # all_hits: list of 0/1 for all proteins in the environment
+    # rewards: list of rewards per episode
+    # k: top-k for precision/recall
+    n_selected = len(selected_hits)
+    n_hits = sum(selected_hits)
+    n_total_hits = sum(all_hits)
+    hit_rate = n_hits / n_selected if n_selected else 0.0
+    avg_reward = np.mean(rewards)
+    cum_reward = np.sum(rewards)
+    # Precision@k, Recall@k, F1@k
+    top_k = selected_hits[:k]
+    true_k = all_hits[:k]
+    precision_at_k = sum(top_k) / k if k else 0.0
+    recall_at_k = sum(top_k) / n_total_hits if n_total_hits else 0.0
+    f1_at_k = (2 * precision_at_k * recall_at_k / (precision_at_k + recall_at_k)) if (precision_at_k + recall_at_k) else 0.0
+    # AUC-ROC (if possible)
+    try:
+        auc_roc = roc_auc_score(all_hits, [1.0]*len(all_hits))  # Dummy: all selected, for demo
+    except Exception:
+        auc_roc = float('nan')
+    # NDCG (ranking quality)
+    try:
+        ndcg = ndcg_score([all_hits], [selected_hits])
+    except Exception:
+        ndcg = float('nan')
+    return {
+        'hit_rate': hit_rate,
+        'avg_reward': avg_reward,
+        'cum_reward': cum_reward,
+        'precision@k': precision_at_k,
+        'recall@k': recall_at_k,
+        'f1@k': f1_at_k,
+        'auc_roc': auc_roc,
+        'ndcg': ndcg,
+    }
+
+def evaluate_agent(model, env, n_episodes=5, k=5):
     rewards = []
+    all_selected_hits = []
+    all_env_hits = []
     for _ in range(n_episodes):
         obs, info = env.reset()
         done = False
         episode_reward = 0
+        selected_hits = []
+        env_hits = []
         while not done:
             action, _ = model.predict(obs, deterministic=True)
             obs, reward, done, truncated, info = env.step(action)
             episode_reward += reward
+            selected_hits.append(int(info.get('was_hit', 0)))
+            env_hits.append(int(info.get('was_hit', 0)))
             if done:
                 break
         rewards.append(episode_reward)
-    return np.mean(rewards), rewards
+        all_selected_hits.extend(selected_hits)
+        all_env_hits.extend(env_hits)
+    metrics = compute_metrics(all_selected_hits, all_env_hits, rewards, k=k)
+    return np.mean(rewards), rewards, metrics
 
 def main():
     print("Benchmarking PPO, DQN, and A2C on multi-objective reward environment\n")
@@ -56,15 +104,17 @@ def main():
         model.learn(total_timesteps=10_000)
         print(f"Evaluating {name}...")
         eval_env = env_fn()
-        mean_reward, rewards = evaluate_agent(model, eval_env, n_episodes=5)
+        mean_reward, rewards, metrics = evaluate_agent(model, eval_env, n_episodes=5, k=5)
         results[name] = {
             "mean_reward": mean_reward,
             "rewards": rewards,
+            "metrics": metrics,
         }
         print(f"{name} mean reward: {mean_reward:.2f}\n")
     print("\nSummary:")
     for name, res in results.items():
         print(f"{name}: Mean Reward = {res['mean_reward']:.2f}, Rewards = {res['rewards']}")
+        print(f"  Metrics: {res['metrics']}")
 
     # --- Visualization ---
     agent_names = list(results.keys())
@@ -78,7 +128,7 @@ def main():
     plt.ylabel("Mean Reward")
     plt.xlabel("Agent")
     plt.tight_layout()
-    plt.savefig("outputs/agent_mean_rewards.png", dpi=150)
+    plt.savefig("tests/outputs/agent_mean_rewards.png", dpi=150)
     plt.show()
 
     plt.figure(figsize=(12, 6))
@@ -89,7 +139,7 @@ def main():
     plt.ylabel("Reward")
     plt.legend()
     plt.tight_layout()
-    plt.savefig("outputs/agent_episode_rewards.png", dpi=150)
+    plt.savefig("tests/outputs/agent_episode_rewards.png", dpi=150)
     plt.show()
 
 if __name__ == "__main__":
