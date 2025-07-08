@@ -55,7 +55,8 @@ class TestProteinEnv:
 
         assert step_count == 5
         assert total_reward >= 0
-        assert total_reward <= 5
+        # Allow for higher rewards due to enhanced multi-objective rewards
+        assert total_reward <= 10
 
     def test_seed_reproducibility(self):
         feats = np.random.randn(10, 4).astype(np.float32)

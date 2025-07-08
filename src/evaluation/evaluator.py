@@ -14,10 +14,11 @@ from sklearn.metrics import (
     precision_score, recall_score, f1_score, roc_auc_score,
     average_precision_score, ndcg_score
 )
-from sklearn.metrics.pairwise import cosine_similarity
 import matplotlib.pyplot as plt
 import seaborn as sns
 from pathlib import Path
+
+from ..utils import filter_valid_indices, normalize_to_unit_range, capped_cosine_similarity
 
 logger = logging.getLogger(__name__)
 
@@ -173,7 +174,7 @@ class ProteinEvaluator:
         metrics = RankingMetrics()
         
         # Filter out invalid indices
-        valid_indices = [idx for idx in selected_indices if 0 <= idx < len(targets)]
+        valid_indices = filter_valid_indices(selected_indices, targets)
         if not valid_indices:
             return metrics
         
@@ -262,7 +263,7 @@ class ProteinEvaluator:
         metrics = DiversityMetrics()
         
         # Filter out invalid indices
-        valid_indices = [idx for idx in selected_indices if 0 <= idx < len(features)]
+        valid_indices = filter_valid_indices(selected_indices, features)
         if len(valid_indices) < 2:
             metrics.diversity_score = 1.0
             metrics.diversity_trajectory = [1.0] * len(valid_indices)
@@ -270,7 +271,7 @@ class ProteinEvaluator:
         
         # Calculate similarity matrix
         selected_features = features[valid_indices]
-        similarity_matrix = cosine_similarity(selected_features)
+        similarity_matrix = capped_cosine_similarity(selected_features)
         metrics.similarity_matrix = similarity_matrix
         
         # Basic diversity metrics
@@ -288,7 +289,7 @@ class ProteinEvaluator:
                 metrics.diversity_trajectory.append(1.0)
             else:
                 subset_features = features[valid_indices[:i]]
-                subset_sim = cosine_similarity(subset_features)
+                subset_sim = capped_cosine_similarity(subset_features)
                 subset_upper = subset_sim[np.triu_indices_from(subset_sim, k=1)]
                 diversity = 1.0 - float(np.mean(subset_upper))
                 metrics.diversity_trajectory.append(diversity)

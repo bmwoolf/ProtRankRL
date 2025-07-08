@@ -12,6 +12,7 @@ biopython>=1.80
 chembl-webresource-client>=0.10.8
 pandas>=2.0.0
 requests>=2.28.0
+pyarrow>=10.0.0
 
 # Enhanced multi-objective environment dependencies
 scipy>=1.10.0

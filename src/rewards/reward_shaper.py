@@ -10,7 +10,8 @@ from abc import ABC, abstractmethod
 from typing import Any, Dict, List, Optional, Union
 import numpy as np
 from pydantic import BaseModel, Field
-from sklearn.metrics.pairwise import cosine_similarity
+
+from ..utils import filter_valid_indices, normalize_to_unit_range, capped_cosine_similarity
 
 logger = logging.getLogger(__name__)
 
@@ -89,7 +90,8 @@ class BinaryRewardFunction(BaseRewardFunction):
         novelty_scores: Optional[List[float]] = None,
     ) -> float:
         """Calculate binary reward (0 or 1) based on hit status."""
-        if action < 0 or action >= len(targets):
+        valid_indices = filter_valid_indices([action], targets)
+        if not valid_indices:
             return 0.0
         return float(targets[action])
     
@@ -124,7 +126,8 @@ class AffinityBasedRewardFunction(BaseRewardFunction):
         novelty_scores: Optional[List[float]] = None,
     ) -> float:
         """Calculate reward based on binding affinity."""
-        if action < 0 or action >= len(targets):
+        valid_indices = filter_valid_indices([action], targets)
+        if not valid_indices:
             return 0.0
             
         # Fallback to binary reward if no experimental data
@@ -185,7 +188,8 @@ class MultiObjectiveRewardFunction(BaseRewardFunction):
         novelty_scores: Optional[List[float]] = None,
     ) -> float:
         """Calculate multi-objective reward."""
-        if action < 0 or action >= len(targets):
+        valid_indices = filter_valid_indices([action], targets)
+        if not valid_indices:
             return 0.0
             
         # Fallback to binary reward if no experimental data
@@ -282,7 +286,8 @@ class EnhancedMultiObjectiveRewardFunction(BaseRewardFunction):
         novelty_scores: Optional[List[float]] = None,
     ) -> float:
         """Calculate enhanced multi-objective reward."""
-        if action < 0 or action >= len(targets):
+        valid_indices = filter_valid_indices([action], targets)
+        if not valid_indices:
             return 0.0
         
         # Base activity reward
@@ -416,7 +421,8 @@ class EnhancedMultiObjectiveRewardFunction(BaseRewardFunction):
         novelty_scores: Optional[List[float]] = None,
     ) -> Dict[str, float]:
         """Get enhanced multi-objective reward components."""
-        if action < 0 or action >= len(targets):
+        valid_indices = filter_valid_indices([action], targets)
+        if not valid_indices:
             return {"total": 0.0}
         
         activity_reward = self._calculate_activity_strength_reward(action, targets, experimental_data)

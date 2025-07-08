@@ -9,9 +9,9 @@ from typing import Any
 import gymnasium as gym
 import numpy as np
 from gymnasium import spaces
-from sklearn.metrics.pairwise import cosine_similarity
 
 from .data_loader import load_experimental_data
+from ..utils import normalize_to_unit_range, capped_cosine_similarity
 
 logger = logging.getLogger(__name__)
 
@@ -84,17 +84,15 @@ class ProteinEnv(gym.Env):
 
     def _normalize_features(self, feats: np.ndarray) -> np.ndarray:
         """Normalize features to [-1, 1] range."""
-        feats_min = np.min(feats, axis=0, keepdims=True)
-        feats_max = np.max(feats, axis=0, keepdims=True)
-        feats_range = feats_max - feats_min
-        feats_range[feats_range == 0] = 1.0
-        normalized = 2.0 * (feats - feats_min) / feats_range - 1.0
+        # Use utility function to normalize to [0, 1], then scale to [-1, 1]
+        normalized_01 = normalize_to_unit_range(feats)
+        normalized = 2.0 * normalized_01 - 1.0
         return normalized.astype(np.float32)
 
     def _compute_protein_similarities(self) -> None:
         """Precompute pairwise protein similarities for diversity calculation."""
         logger.info("Computing protein similarity matrix...")
-        self.similarity_matrix = cosine_similarity(self.feats)
+        self.similarity_matrix = capped_cosine_similarity(self.feats)
         logger.info(f"Computed similarity matrix: {self.similarity_matrix.shape}")
 
     def _compute_novelty_scores(self) -> None:

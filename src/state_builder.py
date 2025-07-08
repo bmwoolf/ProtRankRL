@@ -4,6 +4,8 @@ import os
 from typing import Optional
 import hashlib
 
+from .utils import normalize_to_unit_range
+
 CACHE_PATH = "protein_inputs/processed/state_cache.parquet"
 
 # Placeholder: load harmonized dataframes (UniProt, AlphaFold, etc.)
@@ -37,8 +39,8 @@ def build_protein_state(protein_id: str, data_version: str = "v1") -> np.ndarray
 
     # --- Harmonize features ---
     # Example: use ESM embedding from UniProt dataset
-    if not UNIPROT_DF.empty and protein_id in UNIPROT_DF["protein_id"].values:
-        row = UNIPROT_DF[UNIPROT_DF["protein_id"] == protein_id].iloc[0]
+    if not UNIPROT_DF.empty and protein_id in UNIPROT_DF["uniprot_id"].values:
+        row = UNIPROT_DF[UNIPROT_DF["uniprot_id"] == protein_id].iloc[0]
         embedding_cols = [col for col in UNIPROT_DF.columns if col.startswith("f")]
         vector = row[embedding_cols].values.astype(np.float32)
     else:
