@@ -9,125 +9,55 @@ Reinforcement Learning for Protein Target Prioritization
 6. incentives like Google
 
 ## Overview
+ProtRankRL is a production-ready reinforcement learning system for prioritizing protein targets using real experimental data and multi-objective reward optimization. It enables small biotechs to leverage compute for data-driven, automated triage of protein candidates for drugs.
 
-ProtRankRL is a Gymnasium-compatible reinforcement learning environment for training agents to prioritize protein targets based on scientific embeddings and known outcomes. The goal of this is to understand RL and apply it to one digital domain. The environment models triage decisions over protein batches, enabling RL agents to learn optimal ranking strategies.
-
-## Features
-
-- **Gymnasium-compatible**: Full compatibility with Gym RL framework
-- **Type-safe**: Full Python 3.11+ type hints with Pydantic validation
-- **Real experimental data**: Uses ChEMBL experimental activities instead of synthetic data
-- **ESM protein embeddings**: 1280-dimensional protein representations from ESM-1b
-- **100 validated proteins**: Well-annotated proteins with experimental data
-[WIP for more]
+## Key Features
+- **Multi-objective RL**: Balances activity, diversity, novelty, and cost
+- **Benchmarking**: Compare PPO, DQN, and A2C agents
+- **Metrics**: Hit rate, precision@k, recall@k, F1, AUC-ROC, NDCG
+- **Visualizations**: Bar/line plots for agent performance
+- **Integration**: Minimal, reproducible, and extensible
 
 ## Quick Start
-
-### Automated Setup (Recommended)
-
-```bash
-# Clone the repository
-git clone https://github.com/your-org/protrankrl.git
-cd protrankrl
-
-# Run automated setup and data pipeline
-python setup.py --run-pipeline
-
-# Or for development setup
-python setup.py --dev --run-pipeline --run-tests
-```
-
-### Manual Installation
-
 ```bash
 # Clone and install
 git clone https://github.com/your-org/protrankrl.git
 cd protrankrl
+
+# Create virtual env
+python3 -m venv .venv
+source .venv/bin/activate
+
 pip install -e .
 
-# Install development dependencies
-pip install -e ".[dev]"
+# Run the benchmark (requires data pipeline to be run first)
+python tests/test_sb3_algorithms.py
 
-# Install additional dependencies for data collection
-pip install requests biopython chembl-webresource-client fair-esm torch
+# Code quality 
+black src/ tests/ examples/ # Format 
+ruff check src/ tests/ examples/ # Lint
+mypy src/ # Type checking
 ```
 
-### Data Pipeline
+## How It Works
+- Uses a Gymnasium-compatible environment with real protein data from Uniprot + Chembl and ESM-1b embeddings
+- Custom reward function combines hit/activity, diversity, novelty, and cost
+- Trains and evaluates RL agents (PPO, DQN, A2C) on protein triage
+- Outputs agent performance metrics and visualizations
 
-```bash
-# Run the complete data pipeline
-python scripts/run_full_pipeline.py
+## Results (Example)
+| Agent | Mean Reward | Hit Rate | Precision@5 | Recall@5 | F1@5 | NDCG |
+|-------|-------------|----------|-------------|----------|------|------|
+| PPO   | 3.18        | 1.00     | 1.00        | 0.10     | 0.18 | 1.00 |
+| DQN   | 10.89       | 0.70     | 0.60        | 0.09     | 0.15 | 1.00 |
+| A2C   | 12.04       | 1.00     | 1.00        | 0.10     | 0.18 | 1.00 |
 
-# Or with custom settings
-python scripts/run_full_pipeline.py --num-proteins 50 --num-workers 4 --verbose
+See `tests/outputs/agent_mean_rewards.png` and `tests/outputs/agent_episode_rewards.png` for visualizations, though they are simplistic.
 
-# Validate proteins independently
-python scripts/validation/validate_proteins.py --verbose
-```
-
-### Training PPO Agent
-
-```bash
-# Run quick demo
-python examples/quickstart_demo.py
-
-# Train PPO agent
-python examples/train_ppo_agent.py
-```
-
-## Development
-
-### Running Tests
-
-```bash
-pytest -q  # Quick tests
-pytest --cov=src  # With coverage
-```
-
-### Code Quality
-
-```bash
-black src/ tests/ examples/  # Format code
-ruff check src/ tests/ examples/  # Lint code
-mypy src/  # Type checking
-```
-
-## Data Pipeline
-
-The project now uses real experimental data instead of synthetic data:
-
-### 1. Protein Validation
-- 100 UniProt proteins validated as "well-annotated" in ChEMBL
-- Each protein has exact ChEMBL target match and experimental activities
-
-### 2. Data Collection
-```bash
-# Download protein sequences
-python scripts/data_collection/download_protein_sequences.py
-
-# Extract experimental activities (parallel)
-python scripts/data_collection/extract_chembl_activities_parallel.py 8
-
-# Generate ESM embeddings
-python scripts/embeddings/generate_esm_embeddings_truncated.py
-
-# Create unified dataset
-python scripts/data_collection/create_unified_dataset.py
-```
-
-### 3. Dataset Statistics
-- **100 proteins** with ESM embeddings (1280 dimensions each)
-- **92,133 experimental activities** from ChEMBL
-- **96% activity rate** (96/100 proteins have experimental data)
-- **Unified format**: Ready for RL environment integration
-
-### Output
-- Unified dataset: `protein_inputs/processed/unified_protein_dataset.csv`
-- ESM embeddings: `protein_inputs/embeddings/validated_proteins_esm_embeddings.npy`
-- Experimental data: `protein_inputs/processed/chembl_experimental_data.csv`
+## Future
+- Autoselect the best-performing agent to rank new protein candidates
+- API for integration
+- Scripting for retraining or extending with new data or objectives
 
 ## License
-
 MIT
-
----
