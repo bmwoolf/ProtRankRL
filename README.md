@@ -28,7 +28,7 @@ cd protrankrl
 python3 -m venv .venv
 source .venv/bin/activate
 
-pip install -e .
+pip install -r requirements.txt
 
 # Run the benchmark (requires data pipeline to be run first)
 python tests/test_sb3_algorithms.py
