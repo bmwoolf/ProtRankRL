@@ -5,8 +5,9 @@
 Reinforcement Learning for Protein Target Prioritization
 
 ## TODO
-3. Multi-objective rewards: Add diversity, novelty, or cost constraints to the reward function.
 4. Try other RL algorithms from [miniRL](https://github.com/seungeunrho/minimalRL)
+5. turn into a production level product per the original description
+6. simplify repo, turn into abstraction layer
 
 ## Overview
 
