@@ -2,6 +2,7 @@
 Protein database loader for the API.
 
 Loads pre-processed protein data and provides fast lookup capabilities.
+Uses the enhanced state builder for feature generation.
 """
 
 import logging
@@ -9,6 +10,8 @@ import numpy as np
 import pandas as pd
 from typing import Dict, List, Optional, Tuple
 from pathlib import Path
+
+from ..env.state_builder import ProteinStateBuilder
 
 logger = logging.getLogger(__name__)
 
@@ -23,6 +26,7 @@ class ProteinDatabase:
         self.features: Optional[np.ndarray] = None
         self.targets: Optional[np.ndarray] = None
         self.experimental_data: Dict[str, Dict] = {}
+        self.state_builder: Optional[ProteinStateBuilder] = None
         
         self._load_data()
     
@@ -38,9 +42,11 @@ class ProteinDatabase:
         for idx, uniprot_id in enumerate(self.df['uniprot_id']):
             self.protein_index[uniprot_id] = idx
         
-        # Extract features (ESM embeddings)
-        feature_cols = [col for col in self.df.columns if col.startswith('f')]
-        self.features = self.df[feature_cols].values.astype(np.float32)
+        # Initialize enhanced state builder
+        self.state_builder = ProteinStateBuilder(str(self.data_path))
+        
+        # Generate features using enhanced state builder
+        self._generate_features()
         
         # Extract targets (activity labels)
         self.targets = self.df['has_activity'].values.astype(np.int32)
@@ -49,6 +55,23 @@ class ProteinDatabase:
         self._load_experimental_data()
         
         logger.info(f"Loaded {len(self.df)} proteins with {self.features.shape[1]} features")
+    
+    def _generate_features(self) -> None:
+        """Generate features using the enhanced state builder."""
+        logger.info("Generating features using enhanced state builder")
+        
+        features_list = []
+        for uniprot_id in self.df['uniprot_id']:
+            feature_vector = self.state_builder.get_feature_vector(uniprot_id)
+            if feature_vector is not None:
+                features_list.append(feature_vector)
+            else:
+                # Fallback: zero vector
+                feature_vector = np.zeros(self.state_builder.get_feature_dim(), dtype=np.float32)
+                features_list.append(feature_vector)
+        
+        self.features = np.array(features_list, dtype=np.float32)
+        logger.info(f"Generated {len(self.features)} feature vectors with {self.features.shape[1]} dimensions")
     
     def _load_experimental_data(self) -> None:
         """Load experimental data for proteins."""
