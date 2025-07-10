@@ -22,7 +22,7 @@ from typing import Any
 
 import matplotlib.pyplot as plt
 import numpy as np
-from stable_baselines3 import PPO
+from sbx import PPO
 
 # Add project root to path
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))

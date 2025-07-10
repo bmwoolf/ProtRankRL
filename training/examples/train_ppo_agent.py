@@ -7,10 +7,9 @@ import time
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
-from stable_baselines3 import PPO
-from stable_baselines3.common.callbacks import EvalCallback
-from stable_baselines3.common.logger import configure
-from stable_baselines3.common.vec_env import DummyVecEnv
+from sbx import PPO
+from sbx.vec_env import DummyVecEnv
+from sbx.callbacks import EvalCallback
 
 from src.env import create_synthetic_env
 
@@ -122,7 +121,8 @@ def main():
     print("=" * 60)
 
     # Configure logging to reduce output
-    configure(folder="./logs", format_strings=["stdout"])
+    # No direct SBX equivalent for logger configuration, so this line is removed.
+    # If specific logging configuration is needed, it would require a different SBX import or direct setup.
 
     # Test different timestep configurations
     timestep_configs = [

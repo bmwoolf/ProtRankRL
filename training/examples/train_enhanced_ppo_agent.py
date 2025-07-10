@@ -25,11 +25,10 @@ from typing import Any
 
 import matplotlib.pyplot as plt
 import numpy as np
-from stable_baselines3 import PPO
-from stable_baselines3.common.callbacks import CheckpointCallback, EvalCallback
-from stable_baselines3.common.monitor import Monitor
-from stable_baselines3.common.results_plotter import plot_results
-from stable_baselines3.common.vec_env import DummyVecEnv
+from sbx import PPO
+from sbx.vec_env import DummyVecEnv
+from sbx.monitor import Monitor
+from sbx.callbacks import CheckpointCallback, EvalCallback
 
 # Add project root to path
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
@@ -404,17 +403,17 @@ def plot_training_results(model_names: list[str], log_dir: str = "./logs/") -> N
     """Plot training results for comparison."""
     try:
         # Plot training curves
-        plot_results(
-            [f"{log_dir}/{name}" for name in model_names],
-            timesteps_to_plot=1e6,
-            title="Enhanced PPO Training Results",
-            xlabel="Timesteps",
-            ylabel="Episode Reward",
-        )
-        plt.savefig("logs/enhanced_training_curves.png", dpi=300, bbox_inches="tight")
-        plt.close()
+        # plot_results(
+        #     [f"{log_dir}/{name}" for name in model_names],
+        #     timesteps_to_plot=1e6,
+        #     title="Enhanced PPO Training Results",
+        #     xlabel="Timesteps",
+        #     ylabel="Episode Reward",
+        # )
+        # plt.savefig("logs/enhanced_training_curves.png", dpi=300, bbox_inches="tight")
+        # plt.close()
 
-        print("Training curves saved to logs/enhanced_training_curves.png")
+        print("Training curves plotting is not directly supported by SBX.")
 
     except Exception as e:
         print(f"Could not plot training results: {e}")

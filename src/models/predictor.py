@@ -9,7 +9,7 @@ import numpy as np
 import torch
 from pathlib import Path
 from typing import List, Tuple, Optional
-from stable_baselines3 import PPO
+from sbx import PPO
 
 logger = logging.getLogger(__name__)
 
