@@ -139,10 +139,8 @@ def train_model(
         clip_range=0.2,
         tensorboard_log=f"./logs/{model_name}_tensorboard/",
         policy_kwargs={
-            "net_arch": {"pi": [256, 256], "vf": [256, 256]},
-            "activation_fn": nn.ReLU,
-        },
-        device=device
+            "net_arch": {"pi": [256, 256], "vf": [256, 256]}
+        }
     )
     model.learn(
         total_timesteps=timesteps,
