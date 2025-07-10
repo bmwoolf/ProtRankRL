@@ -165,3 +165,57 @@ ProtRankRL/
 
 ## License
 MIT
+
+## Environment Setup for GPU Training
+
+### Prerequisites
+- NVIDIA GPU with CUDA support
+- Ubuntu 24.04 (tested)
+- NVIDIA Driver 550.120 or compatible
+- CUDA 12.0
+- cuDNN 9.10.2
+
+### GPU Environment Setup
+
+1. **Install CUDA 12.0:**
+   ```bash
+   # Download and install CUDA 12.0 from NVIDIA website
+   # Follow official installation guide for Ubuntu 24.04
+   ```
+
+2. **Install cuDNN 9.10.2 for CUDA 12:**
+   ```bash
+   # Download cuDNN 9.10.2 .deb package from NVIDIA
+   sudo dpkg -i cudnn-local-repo-ubuntu2404-9.10.2.21_1.0-1_amd64.deb
+   sudo cp /var/cudnn-local-repo-ubuntu2404-9.10.2.21/cudnn-local-*-keyring.gpg /usr/share/keyrings/
+   sudo apt update
+   sudo apt install cudnn-cuda-12
+   ```
+
+3. **Create conda environment:**
+   ```bash
+   conda create -n protrank python=3.11 -y
+   conda activate protrank
+   ```
+
+4. **Install JAX with CUDA 12 support:**
+   ```bash
+   pip install --upgrade "jax[cuda12]"
+   ```
+
+5. **Install project dependencies:**
+   ```bash
+   pip install -r requirements.txt
+   ```
+
+6. **Verify GPU setup:**
+   ```bash
+   python -c "import jax; print('JAX version:', jax.__version__); print('GPU devices:', jax.devices('gpu'))"
+   ```
+
+### Important Notes
+- Python 3.11 is required for JAX GPU wheels compatibility
+- cuDNN 9.10.2 is required (9.5.1 will cause compatibility issues)
+- Ensure no old cuDNN libraries remain in `/usr/local/cuda/lib64/`
+- Reboot system after installing new cuDNN libraries
+- The requirements.txt has been updated to avoid cuDNN version conflicts
