@@ -15,7 +15,7 @@ Arguments:
   --n_epochs       Number of epochs per update (default: 10)
   --device         Device to use: "cpu", "cuda", or "mps" (default: "cpu")
 
-Lambda Labs Setup:
+GPU Setup:
   1. Launch a GPU instance (Ubuntu recommended)
   2. Install Python, pip, and CUDA-enabled PyTorch
   3. Install requirements: pip install -r requirements.txt
