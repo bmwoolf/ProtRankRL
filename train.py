@@ -17,6 +17,9 @@ import torch.nn as nn
 
 from src.env.state_builder import ProteinStateBuilder
 
+import jax
+print(jax.devices())
+
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
