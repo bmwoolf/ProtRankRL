@@ -4,11 +4,6 @@
 
 Rank proteins using reinforcement learning
 
-## TODO
-5. production level product per the original description (simplify repo, turn into abstraction layer)
-6. incentives like Google
-7. ESM embeddings fix
-
 ## Overview
 
 ProtRankRL uses reinforcement learning to rank proteins based on their potential as drug targets. The system combines protein sequence embeddings with experimental activity data to provide intelligent protein prioritization.
