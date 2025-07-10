@@ -154,7 +154,7 @@ def train_model(
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Remote/GPU Training for ProtRankRL")
-    parser.add_argument('--timesteps', type=int, default=50000, help='Number of training timesteps')
+    parser.add_argument('--timesteps', type=int, default=2000000, help='Number of training timesteps')
     parser.add_argument('--max_proteins', type=int, default=50, help='Number of proteins to use')
     parser.add_argument('--model_name', type=str, default='ppo_enhanced_1283d', help='Model name for saving')
     parser.add_argument('--learning_rate', type=float, default=3e-4, help='Learning rate')
