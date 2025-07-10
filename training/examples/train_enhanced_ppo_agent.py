@@ -26,9 +26,9 @@ from typing import Any
 import matplotlib.pyplot as plt
 import numpy as np
 from sbx import PPO
-from sbx.vec_env import DummyVecEnv
-from sbx.monitor import Monitor
-from sbx.callbacks import CheckpointCallback, EvalCallback
+from stable_baselines3.common.vec_env import DummyVecEnv
+from stable_baselines3.common.monitor import Monitor
+from stable_baselines3.common.callbacks import CheckpointCallback, EvalCallback
 
 # Add project root to path
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))

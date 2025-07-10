@@ -8,9 +8,9 @@ import time
 import argparse
 
 from sbx import PPO
-from sbx.vec_env import DummyVecEnv
-from sbx.monitor import Monitor
-from sbx.callbacks import CheckpointCallback, EvalCallback
+from stable_baselines3.common.vec_env import DummyVecEnv
+from stable_baselines3.common.monitor import Monitor
+from stable_baselines3.common.callbacks import CheckpointCallback, EvalCallback
 import gymnasium as gym
 from gymnasium import spaces
 import torch.nn as nn
@@ -107,6 +107,7 @@ def train_model(
     start_time = time.time()
     train_env = DummyVecEnv([create_env(max_proteins=max_proteins) for _ in range(4)])
     eval_env = DummyVecEnv([create_env(max_proteins=max_proteins) for _ in range(2)])
+
     eval_callback = EvalCallback(
         eval_env,
         best_model_save_path=f"./models/{model_name}_best_",

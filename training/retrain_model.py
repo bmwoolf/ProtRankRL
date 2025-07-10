@@ -15,9 +15,9 @@ import time
 import argparse
 
 from sbx import PPO
-from sbx.vec_env import DummyVecEnv
-from sbx.monitor import Monitor
-from sbx.callbacks import CheckpointCallback, EvalCallback
+from stable_baselines3.common.vec_env import DummyVecEnv
+from stable_baselines3.common.monitor import Monitor
+from stable_baselines3.common.callbacks import CheckpointCallback, EvalCallback
 import gymnasium as gym
 from gymnasium import spaces
 import torch.nn as nn

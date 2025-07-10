@@ -8,8 +8,8 @@ import time
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
 from sbx import PPO
-from sbx.vec_env import DummyVecEnv
-from sbx.callbacks import EvalCallback
+from stable_baselines3.common.vec_env import DummyVecEnv
+from stable_baselines3.common.callbacks import EvalCallback
 
 from src.env import create_synthetic_env
 

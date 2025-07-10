@@ -333,7 +333,8 @@ class ProteinEnv(gym.Env):
         self.consecutive_no_improvement = 0
         self.best_episode_reward = float("-inf")
 
-        return self.feats[self.current_idx], {"protein_idx": 0}
+        obs = self.feats[self.current_idx]
+        return obs, {"protein_idx": 0}
 
     def step(
         self, action: int

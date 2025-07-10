@@ -16,8 +16,8 @@ from sklearn.metrics import (
     ndcg_score,
     roc_auc_score,
 )
+from stable_baselines3.common.vec_env import DummyVecEnv
 from sbx import A2C, DQN, PPO
-from sbx.vec_env import DummyVecEnv
 
 from src.env import create_experimental_env
 
